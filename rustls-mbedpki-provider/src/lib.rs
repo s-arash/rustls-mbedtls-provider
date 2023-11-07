@@ -75,7 +75,7 @@ pub fn mbedtls_err_into_rustls_err_with_error_msg(err: mbedtls::Error, msg: &str
     }
 }
 
-fn rustls_signature_scheme_to_mbedtls_hash_type(signature_scheme: SignatureScheme) -> mbedtls::hash::Type {
+pub fn rustls_signature_scheme_to_mbedtls_hash_type(signature_scheme: SignatureScheme) -> mbedtls::hash::Type {
     match signature_scheme {
         SignatureScheme::RSA_PKCS1_SHA1 => Type::Sha1,
         SignatureScheme::ECDSA_SHA1_Legacy => Type::Sha1,
@@ -95,12 +95,12 @@ fn rustls_signature_scheme_to_mbedtls_hash_type(signature_scheme: SignatureSchem
     }
 }
 
-fn rustls_signature_scheme_to_mbedtls_pk_options(signature_scheme: SignatureScheme) -> Option<mbedtls::pk::Options> {
+pub fn rustls_signature_scheme_to_mbedtls_pk_options(signature_scheme: SignatureScheme) -> Option<mbedtls::pk::Options> {
     use mbedtls::pk::Options;
     use mbedtls::pk::RsaPadding;
     // reference: https://www.rfc-editor.org/rfc/rfc8446.html#section-4.2.3
     match signature_scheme {
-        SignatureScheme::RSA_PKCS1_SHA1 => None,
+        SignatureScheme::RSA_PKCS1_SHA1 => Some(Options::Rsa { padding: RsaPadding::None }),
         SignatureScheme::ECDSA_SHA1_Legacy => None,
         SignatureScheme::ECDSA_NISTP256_SHA256 => None,
         SignatureScheme::ECDSA_NISTP384_SHA384 => None,
@@ -156,7 +156,7 @@ fn hash_size_bytes(hash_type: mbedtls::hash::Type) -> Option<usize> {
     }
 }
 
-fn buffer_for_hash_type(hash_type: mbedtls::hash::Type) -> Option<Vec<u8>> {
+pub fn buffer_for_hash_type(hash_type: mbedtls::hash::Type) -> Option<Vec<u8>> {
     let size = hash_size_bytes(hash_type)?;
     Some(vec![0; size])
 }
