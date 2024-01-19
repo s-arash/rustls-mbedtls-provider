@@ -16,6 +16,7 @@ use rustls::{
     server::danger::{ClientCertVerified, ClientCertVerifier},
     DistinguishedName,
 };
+use x509_parser::oid_registry::asn1_rs::FromDer;
 
 use crate::{
     mbedtls_err_into_rustls_err, merge_verify_result, rustls_cert_to_mbedtls_cert, verify_certificates_active,
@@ -167,6 +168,19 @@ impl ClientCertVerifier for MbedTlsClientCertVerifier {
                 Ok(())
             }
         };
+
+        let check_crl = true;
+        if check_crl {
+            let dist_points_ext = x509_parser::certificate::X509Certificate::from_der(&end_entity)
+                .map_err(|e| rustls::Error::General(std::format!("Failed to parse extension: {e}")))?
+                .1
+                .iter_extensions()
+                .find_map(|ext| match ext.parsed_extension() {
+                    x509_parser::extensions::ParsedExtension::CRLDistributionPoints(dist_points) => Some(dist_points),
+                    _ => None,
+                });
+            // dist_points_ext.unwrap().points[0].distribution_point.unwrap().
+        }
 
         let mut error_msg = String::default();
         let cert_verify_res = mbedtls::x509::Certificate::verify_with_callback_return_verify_err(

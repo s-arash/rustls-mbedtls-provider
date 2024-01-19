@@ -22,7 +22,7 @@
     clippy::upper_case_acronyms,
     trivial_casts,
     trivial_numeric_casts,
-    missing_docs,
+    // missing_docs,
     unreachable_pub,
     unused_import_braces,
     unused_extern_crates,
@@ -61,6 +61,7 @@ pub mod client_cert_verifier;
 ///
 /// [`ServerCertVerifier`]: rustls::client::danger::ServerCertVerifier
 pub mod server_cert_verifier;
+pub mod crl;
 
 pub use client_cert_verifier::MbedTlsClientCertVerifier;
 pub use server_cert_verifier::MbedTlsServerCertVerifier;
